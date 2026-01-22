@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ARABIC_ALPHABET, TEAM_COLORS } from '../constants';
-import { generateQuizQuestions, generateSpeech } from '../services/geminiService';
+import { generateSpeech } from '../services/geminiService';
 import { QuizQuestion, Team, GameMode } from '../types';
 
 interface GameArenaProps {
@@ -51,30 +51,49 @@ const GameArena: React.FC<GameArenaProps> = ({ mode, onClose }) => {
     initGame();
   }, [mode]);
 
-  const initGame = async () => {
+  const initGame = () => {
     const numTeams = mode === 'TEAMS_3' ? 3 : mode === 'TEAMS_2' ? 2 : 1;
+    const roundsPerPlayer = 5;
+    const totalQuestionsNeeded = numTeams * roundsPerPlayer;
+
     const initialTeams: Team[] = Array.from({ length: numTeams }, (_, i) => ({
       id: i,
-      name: `Team ${String.fromCharCode(65 + i)}`,
+      name: numTeams > 1 ? `Group ${i + 1}` : 'Player 1',
       score: 0,
       color: TEAM_COLORS[i],
     }));
     setTeams(initialTeams);
 
-    const shuffled = [...ARABIC_ALPHABET].sort(() => 0.5 - Math.random());
-    const selected = shuffled.slice(0, 10).map(l => l.name);
+    // Generate Static Questions locally
+    const shuffledAlphabet = [...ARABIC_ALPHABET].sort(() => 0.5 - Math.random());
+    const selectedLetters = shuffledAlphabet.slice(0, Math.min(totalQuestionsNeeded, ARABIC_ALPHABET.length));
     
-    try {
-      const fetchedQuestions = await generateQuizQuestions(selected);
-      setQuestions(fetchedQuestions);
-      setGameState('PLAYING');
-    } catch (err) {
-      setQuestions([
-        { question: "ALIF", options: ["أ", "ب", "ت", "ث"], correctAnswer: "أ", letter: "Alif" },
-        { question: "BA", options: ["ج", "ب", "ح", "خ"], correctAnswer: "ب", letter: "Ba" }
-      ]);
-      setGameState('PLAYING');
+    // If we need more questions than letters, loop back
+    const finalSelection = [];
+    for(let i = 0; i < totalQuestionsNeeded; i++) {
+      finalSelection.push(selectedLetters[i % selectedLetters.length]);
     }
+
+    const staticQuestions: QuizQuestion[] = finalSelection.map(letter => {
+      // Pick 3 wrong options
+      const wrongOptions = ARABIC_ALPHABET
+        .filter(l => l.char !== letter.char)
+        .sort(() => 0.5 - Math.random())
+        .slice(0, 3)
+        .map(l => l.char);
+      
+      const options = [letter.char, ...wrongOptions].sort(() => 0.5 - Math.random());
+
+      return {
+        question: letter.name.toUpperCase(),
+        options: options,
+        correctAnswer: letter.char,
+        letter: letter.name
+      };
+    });
+
+    setQuestions(staticQuestions);
+    setGameState('PLAYING');
   };
 
   const handlePlaySound = async () => {
@@ -82,7 +101,7 @@ const GameArena: React.FC<GameArenaProps> = ({ mode, onClose }) => {
     setPlayingAudio(true);
     try {
       const q = questions[currentQuestionIndex];
-      const prompt = `Find the letter ${q.letter}.`;
+      const prompt = `Point to the letter ${q.letter}.`;
       const base64Audio = await generateSpeech(prompt);
       
       if (base64Audio) {
@@ -110,7 +129,7 @@ const GameArena: React.FC<GameArenaProps> = ({ mode, onClose }) => {
     const correct = answer === questions[currentQuestionIndex].correctAnswer;
     
     if (correct) {
-      setFeedback({ type: 'correct', msg: 'AMAZING! 🌟' });
+      setFeedback({ type: 'correct', msg: 'AWESOME! 🌟' });
       const newTeams = [...teams];
       newTeams[currentTeamIndex].score += 10;
       setTeams(newTeams);
@@ -129,25 +148,19 @@ const GameArena: React.FC<GameArenaProps> = ({ mode, onClose }) => {
     }, 1500);
   };
 
-  if (gameState === 'LOADING') {
-    return (
-      <div className="flex flex-col items-center justify-center p-12 bg-white rounded-[3rem] shadow-2xl min-h-[500px] border-8 border-sky-100">
-        <div className="relative mb-8">
-          <div className="w-24 h-24 border-8 border-sky-400 border-t-transparent rounded-full animate-spin"></div>
-          <div className="absolute inset-0 flex items-center justify-center text-4xl">🧠</div>
-        </div>
-        <p className="text-3xl font-black text-sky-900 animate-bounce uppercase tracking-tighter">Getting Ready...</p>
-      </div>
-    );
-  }
+  if (gameState === 'LOADING') return null;
 
   if (gameState === 'FINISHED') {
     const winner = [...teams].sort((a, b) => b.score - a.score)[0];
+    const isTie = teams.length > 1 && teams.every(t => t.score === teams[0].score);
+
     return (
       <div className="flex flex-col items-center justify-center p-12 bg-gradient-to-br from-amber-50 to-orange-100 rounded-[3rem] shadow-2xl min-h-[500px] border-8 border-white">
-        <div className="text-8xl mb-6">🏆</div>
-        <h2 className="text-5xl font-black text-orange-900 mb-8 uppercase tracking-tighter">{winner.name} Wins!</h2>
-        <div className="flex gap-10 mb-10">
+        <div className="text-8xl mb-6">{isTie ? '🤝' : '🏆'}</div>
+        <h2 className="text-5xl font-black text-orange-900 mb-8 uppercase tracking-tighter">
+          {isTie ? "It's a Tie!" : `${winner.name} Wins!`}
+        </h2>
+        <div className="flex flex-wrap justify-center gap-10 mb-10">
           {teams.map(t => (
             <div key={t.id} className="text-center">
               <div className={`w-24 h-24 rounded-3xl ${t.color} flex items-center justify-center text-white text-4xl font-black shadow-xl border-4 border-white mb-3`}>
@@ -161,7 +174,7 @@ const GameArena: React.FC<GameArenaProps> = ({ mode, onClose }) => {
           onClick={onClose}
           className="px-12 py-5 bg-orange-500 text-white rounded-full font-black text-2xl hover:bg-orange-600 transition-all shadow-xl hover:scale-105"
         >
-          WELL DONE!
+          FINISH MISSION
         </button>
       </div>
     );
@@ -188,25 +201,24 @@ const GameArena: React.FC<GameArenaProps> = ({ mode, onClose }) => {
       </div>
 
       <div className="p-10 flex flex-col items-center">
-        {/* Simplified Cue Card */}
+        {/* Cue Card UI */}
         <div className="relative mb-12 group">
           <div className="absolute inset-0 bg-white/20 blur-2xl rounded-full scale-150 animate-pulse"></div>
           <div className="relative w-80 h-48 bg-white rounded-[2.5rem] shadow-2xl border-8 border-white flex flex-col items-center justify-center transform hover:rotate-1 transition-transform">
-             <div className={`text-7xl font-black tracking-tighter uppercase mb-2 ${currentTeam.color.replace('bg-', 'text-')}`}>
+             <div className={`text-6xl font-black tracking-tighter uppercase mb-2 ${currentTeam.color.replace('bg-', 'text-')}`}>
                {currentQuestion.question}
              </div>
              <button 
                onClick={handlePlaySound}
                disabled={playingAudio}
                className="mt-2 w-16 h-16 bg-sky-100 text-sky-600 rounded-full flex items-center justify-center text-3xl hover:scale-110 active:scale-95 transition-all shadow-md"
-               aria-label="Hear prompt"
              >
                {playingAudio ? '⏳' : '🔊'}
              </button>
           </div>
         </div>
 
-        {/* Large Simplified Options */}
+        {/* Large Option Buttons */}
         <div className="grid grid-cols-2 gap-6 w-full max-w-lg">
           {currentQuestion.options.map((opt, idx) => (
             <button
@@ -223,7 +235,7 @@ const GameArena: React.FC<GameArenaProps> = ({ mode, onClose }) => {
         {feedback && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center bg-sky-900/40 backdrop-blur-md animate-in fade-in duration-200">
             <div className={`p-14 rounded-[4rem] shadow-2xl scale-110 transition-transform ${feedback.type === 'correct' ? 'bg-emerald-500' : 'bg-rose-500'} text-white text-center border-8 border-white`}>
-              <div className="text-9xl mb-4">{feedback.type === 'correct' ? '🎉' : '✨'}</div>
+              <div className="text-9xl mb-4">{feedback.type === 'correct' ? '🌟' : '🍭'}</div>
               <h4 className="text-5xl font-black drop-shadow-md uppercase tracking-tighter">{feedback.msg}</h4>
             </div>
           </div>
