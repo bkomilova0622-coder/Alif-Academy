@@ -1,0 +1,7 @@
+{
+  "name": "Alif Academy",
+  "description": "An interactive Arabic learning adventure for kids and beginners featuring mini-lessons, AI-powered stories, and competitive multi-group games.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
