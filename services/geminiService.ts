@@ -35,7 +35,7 @@ export const generateQuizQuestions = async (letters: string[]): Promise<QuizQues
     The 'question' field should be just the name of the letter in capital letters (e.g., "ALIF" or "BA").
     The 'options' should be 4 Arabic characters.
     The 'correctAnswer' must be the character corresponding to the name in 'question'.
-    The 'letter' field should be the name of the letter.
+    The 'letter' field should be the name of the letter for TTS purposes.
     Format as JSON.`,
     config: {
       responseMimeType: "application/json",
