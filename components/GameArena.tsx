@@ -1,41 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { ARABIC_ALPHABET, TEAM_COLORS } from '../constants';
-import { generateSpeech } from '../services/geminiService';
 import { QuizQuestion, Team, GameMode } from '../types';
 
 interface GameArenaProps {
   mode: GameMode;
   onClose: () => void;
-}
-
-// Utility functions for audio decoding
-function decodeBase64(base64: string) {
-  const binaryString = atob(base64);
-  const len = binaryString.length;
-  const bytes = new Uint8Array(len);
-  for (let i = 0; i < len; i++) {
-    bytes[i] = binaryString.charCodeAt(i);
-  }
-  return bytes;
-}
-
-async function decodeAudioData(
-  data: Uint8Array,
-  ctx: AudioContext,
-  sampleRate: number,
-  numChannels: number,
-): Promise<AudioBuffer> {
-  const dataInt16 = new Int16Array(data.buffer);
-  const frameCount = dataInt16.length / numChannels;
-  const buffer = ctx.createBuffer(numChannels, frameCount, sampleRate);
-
-  for (let channel = 0; channel < numChannels; channel++) {
-    const channelData = buffer.getChannelData(channel);
-    for (let i = 0; i < frameCount; i++) {
-      channelData[i] = dataInt16[i * numChannels + channel] / 32768.0;
-    }
-  }
-  return buffer;
 }
 
 const GameArena: React.FC<GameArenaProps> = ({ mode, onClose }) => {
@@ -96,31 +65,27 @@ const GameArena: React.FC<GameArenaProps> = ({ mode, onClose }) => {
     setGameState('PLAYING');
   };
 
-  const handlePlaySound = async () => {
+  const handlePlaySound = () => {
     if (playingAudio || gameState !== 'PLAYING') return;
+    
     setPlayingAudio(true);
-    try {
-      const q = questions[currentQuestionIndex];
-      const prompt = `Point to the letter ${q.letter}.`;
-      const base64Audio = await generateSpeech(prompt);
-      
-      if (base64Audio) {
-        const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 24000 });
-        const audioBytes = decodeBase64(base64Audio);
-        const audioBuffer = await decodeAudioData(audioBytes, audioCtx, 24000, 1);
-        
-        const source = audioCtx.createBufferSource();
-        source.buffer = audioBuffer;
-        source.connect(audioCtx.destination);
-        source.onended = () => setPlayingAudio(false);
-        source.start();
-      } else {
-        setPlayingAudio(false);
-      }
-    } catch (err) {
-      console.error("Audio error:", err);
-      setPlayingAudio(false);
-    }
+    window.speechSynthesis.cancel();
+    
+    const q = questions[currentQuestionIndex];
+    const utterance = new SpeechSynthesisUtterance(`Find the letter ${q.letter}.`);
+    
+    const voices = window.speechSynthesis.getVoices();
+    const arabicVoice = voices.find(v => v.lang.startsWith('ar'));
+    
+    // We use Arabic lang for the prompt if possible, but the phrase is English.
+    // Usually standard voices are better at the prompt language.
+    utterance.lang = 'en-US'; 
+    utterance.rate = 0.9;
+    
+    utterance.onend = () => setPlayingAudio(false);
+    utterance.onerror = () => setPlayingAudio(false);
+    
+    window.speechSynthesis.speak(utterance);
   };
 
   const handleAnswer = (answer: string) => {
@@ -211,9 +176,9 @@ const GameArena: React.FC<GameArenaProps> = ({ mode, onClose }) => {
              <button 
                onClick={handlePlaySound}
                disabled={playingAudio}
-               className="mt-2 w-16 h-16 bg-sky-100 text-sky-600 rounded-full flex items-center justify-center text-3xl hover:scale-110 active:scale-95 transition-all shadow-md"
+               className={`mt-2 w-16 h-16 rounded-full flex items-center justify-center text-3xl transition-all shadow-md ${playingAudio ? 'bg-sky-500 text-white animate-pulse' : 'bg-sky-100 text-sky-600 hover:scale-110 active:scale-95'}`}
              >
-               {playingAudio ? '⏳' : '🔊'}
+               {playingAudio ? '🔊' : '🔊'}
              </button>
           </div>
         </div>

@@ -1,40 +1,9 @@
-
 import React, { useState } from 'react';
 import { ColoredArabicLetter } from '../constants';
-import { generateMnemonic, generateSpeech } from '../services/geminiService';
+import { generateMnemonic } from '../services/geminiService';
 
 interface LetterCardProps {
   letter: ColoredArabicLetter;
-}
-
-// Utility functions for audio decoding
-function decodeBase64(base64: string) {
-  const binaryString = atob(base64);
-  const len = binaryString.length;
-  const bytes = new Uint8Array(len);
-  for (let i = 0; i < len; i++) {
-    bytes[i] = binaryString.charCodeAt(i);
-  }
-  return bytes;
-}
-
-async function decodeAudioData(
-  data: Uint8Array,
-  ctx: AudioContext,
-  sampleRate: number,
-  numChannels: number,
-): Promise<AudioBuffer> {
-  const dataInt16 = new Int16Array(data.buffer);
-  const frameCount = dataInt16.length / numChannels;
-  const buffer = ctx.createBuffer(numChannels, frameCount, sampleRate);
-
-  for (let channel = 0; channel < numChannels; channel++) {
-    const channelData = buffer.getChannelData(channel);
-    for (let i = 0; i < frameCount; i++) {
-      channelData[i] = dataInt16[i * numChannels + channel] / 32768.0;
-    }
-  }
-  return buffer;
 }
 
 const LetterCard: React.FC<LetterCardProps> = ({ letter }) => {
@@ -57,31 +26,34 @@ const LetterCard: React.FC<LetterCardProps> = ({ letter }) => {
     }
   };
 
-  const handlePlaySound = async (e: React.MouseEvent) => {
+  const handlePlaySound = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (playingAudio) return;
+    
     setPlayingAudio(true);
-    try {
-      const prompt = `Say the Arabic letter ${letter.char} also known as ${letter.name}. Then say the word ${letter.exampleWord} which means ${letter.exampleTranslation}.`;
-      const base64Audio = await generateSpeech(prompt);
-      
-      if (base64Audio) {
-        const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 24000 });
-        const audioBytes = decodeBase64(base64Audio);
-        const audioBuffer = await decodeAudioData(audioBytes, audioCtx, 24000, 1);
-        
-        const source = audioCtx.createBufferSource();
-        source.buffer = audioBuffer;
-        source.connect(audioCtx.destination);
-        source.onended = () => setPlayingAudio(false);
-        source.start();
-      } else {
-        setPlayingAudio(false);
-      }
-    } catch (err) {
-      console.error("Audio error:", err);
-      setPlayingAudio(false);
+    window.speechSynthesis.cancel(); // Stop any current speech
+
+    // We speak the letter name and then the character for better clarity on some systems
+    const textToSpeak = `${letter.name}. ${letter.char}. ${letter.exampleWord}.`;
+    const utterance = new SpeechSynthesisUtterance(textToSpeak);
+    
+    // Try to find an Arabic voice
+    const voices = window.speechSynthesis.getVoices();
+    const arabicVoice = voices.find(v => v.lang.startsWith('ar'));
+    if (arabicVoice) {
+      utterance.voice = arabicVoice;
+      utterance.lang = 'ar-SA';
+    } else {
+      utterance.lang = 'en-US'; // Fallback
     }
+
+    utterance.rate = 0.85; // Slightly slower for learning
+    utterance.pitch = 1.1; // Friendly pitch
+    
+    utterance.onend = () => setPlayingAudio(false);
+    utterance.onerror = () => setPlayingAudio(false);
+    
+    window.speechSynthesis.speak(utterance);
   };
 
   return (
@@ -94,15 +66,10 @@ const LetterCard: React.FC<LetterCardProps> = ({ letter }) => {
         <div className={`absolute inset-0 ${letter.color} rounded-3xl shadow-lg border-4 border-white flex flex-col items-center justify-center p-6 backface-hidden transform group-hover:scale-[1.02] transition-transform`}>
           <button 
             onClick={handlePlaySound}
-            disabled={playingAudio}
-            className="absolute top-4 right-4 w-12 h-12 bg-white/80 rounded-full flex items-center justify-center text-2xl shadow-sm hover:bg-white hover:scale-110 transition-all"
+            className={`absolute top-4 right-4 w-12 h-12 rounded-full flex items-center justify-center text-2xl shadow-sm transition-all ${playingAudio ? 'bg-sky-500 text-white animate-pulse' : 'bg-white/80 hover:bg-white hover:scale-110'}`}
             title="Hear pronunciation"
           >
-            {playingAudio ? (
-              <div className="w-5 h-5 border-3 border-sky-500 border-t-transparent rounded-full animate-spin" />
-            ) : (
-              '🔊'
-            )}
+            {playingAudio ? '🔊' : '🔊'}
           </button>
           <div className={`arabic-text text-8xl ${letter.darkColor} mb-2 drop-shadow-sm`}>{letter.char}</div>
           <div className={`text-2xl font-black ${letter.darkColor}`}>{letter.name}</div>

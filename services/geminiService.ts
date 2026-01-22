@@ -1,4 +1,4 @@
-import { GoogleGenAI, Type, Modality } from "@google/genai";
+import { GoogleGenAI, Type } from "@google/genai";
 import { QuizQuestion } from "../types";
 
 const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
@@ -9,22 +9,6 @@ export const generateMnemonic = async (letterName: string, letterChar: string) =
     contents: `Generate a short, fun, and memorable mnemonic story for a kid to remember the Arabic letter "${letterChar}" (${letterName}). Keep it under 2 sentences and very friendly.`,
   });
   return response.text;
-};
-
-export const generateSpeech = async (text: string) => {
-  const response = await ai.models.generateContent({
-    model: "gemini-2.5-flash-preview-tts",
-    contents: [{ parts: [{ text }] }],
-    config: {
-      responseModalities: [Modality.AUDIO],
-      speechConfig: {
-        voiceConfig: {
-          prebuiltVoiceConfig: { voiceName: 'Kore' },
-        },
-      },
-    },
-  });
-  return response.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
 };
 
 export const generateQuizQuestions = async (letters: string[]): Promise<QuizQuestion[]> => {
