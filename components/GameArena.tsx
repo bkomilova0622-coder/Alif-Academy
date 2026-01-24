@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ARABIC_ALPHABET, TEAM_COLORS } from '../constants';
 import { QuizQuestion, Team, GameMode } from '../types';
+import { soundService } from '../services/soundService';
 
 interface GameArenaProps {
   mode: GameMode;
@@ -74,11 +75,6 @@ const GameArena: React.FC<GameArenaProps> = ({ mode, onClose }) => {
     const q = questions[currentQuestionIndex];
     const utterance = new SpeechSynthesisUtterance(`Find the letter ${q.letter}.`);
     
-    const voices = window.speechSynthesis.getVoices();
-    const arabicVoice = voices.find(v => v.lang.startsWith('ar'));
-    
-    // We use Arabic lang for the prompt if possible, but the phrase is English.
-    // Usually standard voices are better at the prompt language.
     utterance.lang = 'en-US'; 
     utterance.rate = 0.9;
     
@@ -94,11 +90,13 @@ const GameArena: React.FC<GameArenaProps> = ({ mode, onClose }) => {
     const correct = answer === questions[currentQuestionIndex].correctAnswer;
     
     if (correct) {
+      soundService.playSuccess();
       setFeedback({ type: 'correct', msg: 'AWESOME! 🌟' });
       const newTeams = [...teams];
       newTeams[currentTeamIndex].score += 10;
       setTeams(newTeams);
     } else {
+      soundService.playError();
       setFeedback({ type: 'wrong', msg: `OOPS! 🌈` });
     }
 
@@ -120,7 +118,7 @@ const GameArena: React.FC<GameArenaProps> = ({ mode, onClose }) => {
     const isTie = teams.length > 1 && teams.every(t => t.score === teams[0].score);
 
     return (
-      <div className="flex flex-col items-center justify-center p-12 bg-gradient-to-br from-amber-50 to-orange-100 rounded-[3rem] shadow-2xl min-h-[500px] border-8 border-white">
+      <div className="flex flex-col items-center justify-center p-12 bg-gradient-to-br from-amber-50 to-orange-100 rounded-[3rem] shadow-2xl min-h-[500px] border-8 border-white text-center">
         <div className="text-8xl mb-6">{isTie ? '🤝' : '🏆'}</div>
         <h2 className="text-5xl font-black text-orange-900 mb-8 uppercase tracking-tighter">
           {isTie ? "It's a Tie!" : `${winner.name} Wins!`}

@@ -1,7 +1,7 @@
-
 import React, { useState, useEffect } from 'react';
 import { ARABIC_ALPHABET, SIMILARITY_GROUPS, TEAM_COLORS } from '../constants';
 import { Team, GameMode } from '../types';
+import { soundService } from '../services/soundService';
 
 interface GlyphGalaxyProps {
   mode: GameMode;
@@ -44,11 +44,13 @@ const GlyphGalaxy: React.FC<GlyphGalaxyProps> = ({ mode, onClose }) => {
     if (feedback) return;
 
     if (char === targetLetter) {
+      soundService.playSuccess();
       setFeedback({ type: 'correct', msg: 'SUPER SONIC! 🚀' });
       const newTeams = [...teams];
       newTeams[currentTeamIndex].score += 10;
       setTeams(newTeams);
     } else {
+      soundService.playError();
       setFeedback({ type: 'wrong', msg: `BLACK HOLE! 🕳️` });
     }
 
