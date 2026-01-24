@@ -88,7 +88,9 @@ const LetterCard: React.FC<LetterCardProps> = ({ letter }) => {
                   (e.target as HTMLImageElement).src = `https://placehold.co/200?text=${letter.exampleTranslation}`;
                 }}
               />
-              <div className="absolute -bottom-2 -right-2 bg-sky-500 text-white w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold border-2 border-white">أ</div>
+              <div className="absolute -bottom-2 -right-2 bg-sky-500 text-white w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold border-2 border-white arabic-text">
+                {letter.char}
+              </div>
             </div>
             <div>
               <div className="arabic-text text-3xl font-black text-sky-900">{letter.exampleWord}</div>
@@ -111,7 +113,7 @@ const LetterCard: React.FC<LetterCardProps> = ({ letter }) => {
                  ) : (
                    <>
                      <span className="text-3xl group-hover/btn:rotate-12 transition-transform">🤖</span>
-                     <span className="text-xs font-black uppercase tracking-tighter">AI Teacher Trick</span>
+                     <span className="text-xs font-black uppercase tracking-tighter">Get Visual Trick</span>
                    </>
                  )}
                </button>

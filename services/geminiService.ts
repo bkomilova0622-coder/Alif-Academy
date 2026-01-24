@@ -6,7 +6,12 @@ const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 export const generateMnemonic = async (letterName: string, letterChar: string) => {
   const response = await ai.models.generateContent({
     model: 'gemini-3-flash-preview',
-    contents: `Generate a short, fun, and memorable mnemonic story for a kid to remember the Arabic letter "${letterChar}" (${letterName}). Keep it under 2 sentences and very friendly.`,
+    contents: `You are a world-class Arabic teacher for 5-year-old children. 
+    Generate a "Memory Magic" visual mnemonic for the Arabic letter "${letterChar}" (called ${letterName}). 
+    Your mnemonic MUST be relevant to the SHAPE of the letter. 
+    For example, 'Ba' (ب) looks like a boat with a dot below it, or 'Ta' (ت) looks like a smiley face with two eyes.
+    Use simple, fun, and encouraging language. 
+    Keep it to exactly one short, memorable sentence.`,
   });
   return response.text;
 };

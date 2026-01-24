@@ -1,4 +1,3 @@
-
 import { ArabicLetter } from './types';
 
 export interface ColoredArabicLetter extends ArabicLetter {
@@ -7,7 +6,7 @@ export interface ColoredArabicLetter extends ArabicLetter {
 }
 
 export const ARABIC_ALPHABET: ColoredArabicLetter[] = [
-  { char: 'أ', name: 'Alif', transliteration: 'a', exampleWord: 'أرنب', exampleTranslation: 'Rabbit', exampleImage: 'https://images.unsplash.com/photo-1585110396000-c9ffd4e4b308?auto=format&fit=crop&q=80&w=200&h=200', color: 'bg-orange-100', darkColor: 'text-orange-600' },
+  { char: 'أ', name: 'Alif', transliteration: 'aa', exampleWord: 'أرنب', exampleTranslation: 'Rabbit', exampleImage: 'https://images.unsplash.com/photo-1585110396000-c9ffd4e4b308?auto=format&fit=crop&q=80&w=200&h=200', color: 'bg-orange-100', darkColor: 'text-orange-600' },
   { char: 'ب', name: 'Ba', transliteration: 'b', exampleWord: 'بطة', exampleTranslation: 'Duck', exampleImage: 'https://images.unsplash.com/photo-1465153690352-10c1b29577f8?auto=format&fit=crop&q=80&w=200&h=200', color: 'bg-pink-100', darkColor: 'text-pink-600' },
   { char: 'ت', name: 'Ta', transliteration: 't', exampleWord: 'تفاح', exampleTranslation: 'Apple', exampleImage: 'https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?auto=format&fit=crop&q=80&w=200&h=200', color: 'bg-red-100', darkColor: 'text-red-600' },
   { char: 'ث', name: 'Tha', transliteration: 'th', exampleWord: 'ثعلب', exampleTranslation: 'Fox', exampleImage: 'https://images.unsplash.com/photo-1644125003076-ce465d331769?auto=format&fit=crop&q=80&w=200&h=200', color: 'bg-amber-100', darkColor: 'text-amber-600' },
@@ -20,11 +19,11 @@ export const ARABIC_ALPHABET: ColoredArabicLetter[] = [
   { char: 'ز', name: 'Zay', transliteration: 'z', exampleWord: 'زرافة', exampleTranslation: 'Giraffe', exampleImage: 'https://images.unsplash.com/photo-1612358405970-e1aeba9d76c2?auto=format&fit=crop&q=80&w=200&h=200', color: 'bg-purple-100', darkColor: 'text-purple-600' },
   { char: 'س', name: 'Seen', transliteration: 's', exampleWord: 'سمكة', exampleTranslation: 'Fish', exampleImage: 'https://images.unsplash.com/photo-1535591273668-578e31182c4f?auto=format&fit=crop&q=80&w=200&h=200', color: 'bg-fuchsia-100', darkColor: 'text-fuchsia-600' },
   { char: 'ش', name: 'Sheen', transliteration: 'sh', exampleWord: 'شمس', exampleTranslation: 'Sun', exampleImage: 'https://images.unsplash.com/photo-1534067783941-51c9c23ecefd?auto=format&fit=crop&q=80&w=200&h=200', color: 'bg-rose-100', darkColor: 'text-rose-600' },
-  { char: 'ص', name: 'Sad', transliteration: 's', exampleWord: 'صقر', exampleTranslation: 'Falcon', exampleImage: 'https://images.unsplash.com/photo-1611637576109-b6f76185ec9b?auto=format&fit=crop&q=80&w=200&h=200', color: 'bg-sky-100', darkColor: 'text-sky-600' },
-  { char: 'ض', name: 'Dad', transliteration: 'd', exampleWord: 'ضفدع', exampleTranslation: 'Frog', exampleImage: 'https://images.unsplash.com/photo-1559190394-df5a28aab5c5?auto=format&fit=crop&q=80&w=200&h=200', color: 'bg-cyan-100', darkColor: 'text-cyan-600' },
-  { char: 'ط', name: 'Ta', transliteration: 't', exampleWord: 'طائرة', exampleTranslation: 'Plane', exampleImage: 'https://images.unsplash.com/photo-1529074963764-98f45c47344b?auto=format&fit=crop&q=80&w=200&h=200', color: 'bg-orange-100', darkColor: 'text-orange-600' },
-  { char: 'ظ', name: 'Za', transliteration: 'z', exampleWord: 'ظرف', exampleTranslation: 'Envelope', exampleImage: 'https://images.unsplash.com/photo-1577563908411-5077b6dc7624?auto=format&fit=crop&q=80&w=200&h=200', color: 'bg-yellow-100', darkColor: 'text-yellow-600' },
-  { char: 'ع', name: 'Ain', transliteration: 'a', exampleWord: 'عصفور', exampleTranslation: 'Bird', exampleImage: 'https://images.unsplash.com/photo-1486365227551-f3f90034a57c?auto=format&fit=crop&q=80&w=200&h=200', color: 'bg-blue-100', darkColor: 'text-blue-600' },
+  { char: 'ص', name: 'Sad', transliteration: 'S', exampleWord: 'صقر', exampleTranslation: 'Falcon', exampleImage: 'https://images.unsplash.com/photo-1611637576109-b6f76185ec9b?auto=format&fit=crop&q=80&w=200&h=200', color: 'bg-sky-100', darkColor: 'text-sky-600' },
+  { char: 'ض', name: 'Dad', transliteration: 'D', exampleWord: 'ضفدع', exampleTranslation: 'Frog', exampleImage: 'https://images.unsplash.com/photo-1559190394-df5a28aab5c5?auto=format&fit=crop&q=80&w=200&h=200', color: 'bg-cyan-100', darkColor: 'text-cyan-600' },
+  { char: 'ط', name: 'Ta', transliteration: 'T', exampleWord: 'طائرة', exampleTranslation: 'Plane', exampleImage: 'https://images.unsplash.com/photo-1529074963764-98f45c47344b?auto=format&fit=crop&q=80&w=200&h=200', color: 'bg-orange-100', darkColor: 'text-orange-600' },
+  { char: 'ظ', name: 'Za', transliteration: 'Z', exampleWord: 'ظرف', exampleTranslation: 'Envelope', exampleImage: 'https://images.unsplash.com/photo-1577563908411-5077b6dc7624?auto=format&fit=crop&q=80&w=200&h=200', color: 'bg-yellow-100', darkColor: 'text-yellow-600' },
+  { char: 'ع', name: 'Ain', transliteration: '3in', exampleWord: 'عصفور', exampleTranslation: 'Bird', exampleImage: 'https://images.unsplash.com/photo-1486365227551-f3f90034a57c?auto=format&fit=crop&q=80&w=200&h=200', color: 'bg-blue-100', darkColor: 'text-blue-600' },
   { char: 'غ', name: 'Ghain', transliteration: 'gh', exampleWord: 'غزالة', exampleTranslation: 'Gazelle', exampleImage: 'https://images.unsplash.com/photo-1484406566174-9da000fda645?auto=format&fit=crop&q=80&w=200&h=200', color: 'bg-green-100', darkColor: 'text-green-600' },
   { char: 'ف', name: 'Fa', transliteration: 'f', exampleWord: 'فيل', exampleTranslation: 'Elephant', exampleImage: 'https://images.unsplash.com/photo-1557050543-4d5f4e07ef46?auto=format&fit=crop&q=80&w=200&h=200', color: 'bg-slate-100', darkColor: 'text-slate-600' },
   { char: 'ق', name: 'Qaf', transliteration: 'q', exampleWord: 'قرد', exampleTranslation: 'Monkey', exampleImage: 'https://images.unsplash.com/photo-1540573133985-87b6da6d54a9?auto=format&fit=crop&q=80&w=200&h=200', color: 'bg-purple-100', darkColor: 'text-purple-600' },
